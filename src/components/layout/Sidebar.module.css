@@ -1,0 +1,158 @@
+.sidebar {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--primary); /* oscuro */
+  color: var(--foreground);
+  border-right: 1px solid #0f1620;
+  width: 260px;
+  transition: width 0.18s ease;
+  position: sticky;
+  top: 0;
+}
+.is-collapsed {
+  width: 100px;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #0f1620;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brandLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+.brandlink-collapsed {
+  justify-content: center;
+}
+.brandMark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #5e17eb, #38b6ff);
+  box-shadow: 0 0 18px rgba(94, 23, 235, 0.3);
+}
+.brandText {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.collapseBtn {
+  background: transparent;
+  color: #8aa0b2;
+  border: 1px solid #1b2735;
+  border-radius: 8px;
+  width: 32px;
+  height: 28px;
+  cursor: pointer;
+}
+.collapseBtn:hover {
+  background: #0f1620;
+}
+
+.nav {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--foreground);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.navItem:hover {
+  background: #0f1620;
+  color: #fff;
+}
+.navItem--active {
+  background: #111927;
+  color: #fff;
+}
+
+.iconWrap {
+  width: 20px;
+  display: grid;
+  place-items: center;
+}
+.navLabel {
+  font-size: 14px;
+}
+
+.footer {
+  border-top: 1px solid #0f1620;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.userBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #17202b;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #93c5fd;
+  font-size: 12px;
+}
+.avatarSmall {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #17202b;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #93c5fd;
+  font-size: 11px;
+}
+.userMeta {
+  display: grid;
+}
+.userName {
+  font-size: 13px;
+  line-height: 1.1;
+}
+.userRole {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.logoutLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.logoutLink:hover {
+  color: #fff;
+  background: #0f1620;
+  border-color: #1b2735;
+}

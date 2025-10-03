@@ -1,36 +1,84 @@
+// src/app/providers/auth-provider.tsx
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api"; // axios/fetch preconfigurado (credentials: 'include')
 
-type Role = "superadmin" | "admin" | "mechanic";
-type User = { id: string; name: string; role: Role };
+type User = { id: string; email: string; name?: string; roles?: string[]; role: string } | null;
 
-type AuthState = {
-  user: User | null;
+type AuthCtx = {
+  user: User;
   loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
 
-const AuthCtx = createContext<AuthState>({ user: null, loading: true, refresh: async () => {} });
+const AuthContext = createContext<AuthCtx | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(true);
 
-  const refresh = async () => {
+  // Al montar: intenta recuperar sesión (cookie HttpOnly + /auth/me)
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await api.get("/auth/me"); // debe devolver user si token válido
+        const data = {
+          id: me.data.roles[0]?.tenant_id,
+          role: me.data.roles[0]?.role,
+          ...me.data
+        }
+        setUser(data ?? null);
+      } catch {
+        
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      const { data } = await api.get("/auth/me"); // tu backend devuelve { id, name, role }
-      setUser(data);
-    } catch {
-      setUser(null);
+      await api.post("/auth/login", { email, password }); // el backend setea cookies HttpOnly
+      const me = await api.get("/auth/me");
+      const data = {
+        id: me.data.roles[0]?.tenant_id,
+        role: me.data.roles[0]?.role,
+        ...me.data
+      }
+      setUser(data ?? null);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { void refresh(); }, []);
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await api.post("/auth/logout"); // backend limpia cookies
+    } finally {
+      setUser(null);
+      setLoading(false);
+    }
+  };
 
-  return <AuthCtx.Provider value={{ user, loading, refresh }}>{children}</AuthCtx.Provider>;
+  const refresh = async () => {
+    // opcional: golpea /auth/refresh si el backend rota tokens
+    await api.post("/auth/refresh");
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout, refresh }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export const useAuth = () => useContext(AuthCtx);
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+};

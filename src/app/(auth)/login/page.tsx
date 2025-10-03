@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,12 +18,22 @@ type Form = z.infer<typeof schema>;
 export default function LoginPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Form>({ resolver: zodResolver(schema) });
 
-  const onSubmit = async (values: Form) => {
-    const { data } = await api.post("/auth/login", values);
-    // backend devuelve token y setea cookie HttpOnly? Si no, guardamos:
-    if (data?.token) Cookies.set("tutaller_token", data.token, { expires: 7 });
-    window.location.href = "/";
+  const onSubmit = async (values: Form, e?: React.BaseSyntheticEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    try {
+      const { data } = await api.post("/auth/login", values, { skipAuthRedirect: true });
+      if (data?.accessToken){
+        Cookies.set("tutaller_token", data.accessToken, { expires: 7 });
+        window.location.href = "/dashboard";
+      }
+    } catch (err: any) {
+      // err ya viene normalizado desde el interceptor
+      // si deseas manejar algo específico aquí, puedes:
+      console.log(err.status, err.message, err.details);
+    }
   };
+
 
   return (
     <div className={styles.wrapper}>
@@ -30,7 +41,7 @@ export default function LoginPage() {
       <div className={styles.card}>
           <h1 className={styles.title}>Ingresa a tu cuenta</h1>
           <p className={styles.description}>Por favor ingresa tu usuario y contraseña para continuar</p>
-        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+          <form onSubmit={handleSubmit((values, e) => onSubmit(values, e))} className={styles.form}>
           <div className={styles.form__group}>
             <label className={styles.form__label} htmlFor="email">
               Correo electrónico:
